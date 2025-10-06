@@ -290,14 +290,14 @@ function LoginContent() {
             </div>
 
             {/* Setup Link */}
-            <div className="mt-6 text-center">
+            {/* <div className="mt-6 text-center">
               <a
                 href="/setup-admin"
                 className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition duration-150 ease-in-out"
               >
                 Create your first admin account →
               </a>
-            </div>
+            </div> */}
           </div>
         </div>
 
