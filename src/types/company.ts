@@ -11,11 +11,11 @@ export interface CompanyProfile {
 
 export const DEFAULT_COMPANY_PROFILE: CompanyProfile = {
   name: 'E-Catalogue Inc.',
-  tagline: 'Curated products managed by Google Sheets-backed admin panel.',
+  tagline: 'Search Your Products Here!',
   description: 'Your one-stop showcase for curated inventory. Maintain your catalog via the admin dashboard linked to Google Sheets.',
-  email: 'hello@ecatalogue.example',
-  phone: '+1 (555) 123-4567',
-  website: 'https://ecatalogue.example',
-  address: '123 Market Street, Suite 400, Commerce City, CA',
-  showPrices: true,
+  email: 'hello@rupamarketing.app',
+  phone: '0000000000',
+  website: 'https://rupamarketing.vercel.app/',
+  address: '123 Market Street, Suite 400, City,Hyderabad, India',
+  showPrices: false,
 };
