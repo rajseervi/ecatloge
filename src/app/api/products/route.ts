@@ -78,6 +78,9 @@ export async function GET(request: NextRequest) {
     const settingsRow = settingsResponse?.data.values?.[0];
     const company = parseCompanyRow(settingsRow);
 
+    // Memoize company payload so it can be reused across responses within this request.
+    const companyPayload = { company };
+
     // Helper function to validate URL
     const isValidUrl = (string: string) => {
       try {
@@ -112,9 +115,9 @@ export async function GET(request: NextRequest) {
     if (id) {
       const product = products.find(p => p.id === id);
       if (!product) {
-        return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Product not found', ...companyPayload }, { status: 404 });
       }
-      return NextResponse.json({ ...product, company });
+      return NextResponse.json({ ...companyPayload, product });
     }
 
     // Filter products based on visibility, category and search
@@ -145,6 +148,19 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const total = filteredProducts.length;
+
+    if (limit === -1) {
+      return NextResponse.json({
+        products: filteredProducts,
+        total,
+        page: 1,
+        limit,
+        totalPages: 1,
+        categories,
+        company,
+      });
+    }
+
     const start = (page - 1) * limit;
     const end = start + limit;
     const paginatedProducts = filteredProducts.slice(start, end);
