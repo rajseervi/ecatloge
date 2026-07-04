@@ -73,3 +73,90 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ── Animations ─────────────────────────────────── */
+
+/* Shimmer skeleton effect */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
+/* Infinite slide (search progress bar) */
+@keyframes slide-infinite {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.animate-slide-infinite {
+  animation: slide-infinite 1.2s ease-in-out infinite;
+}
+
+/* ── Catalog Loader Animations ──────────────────── */
+
+/* Page flip for catalog icon */
+@keyframes pageFlip {
+  0%, 40% {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  60%, 100% {
+    transform: rotateY(-180deg);
+    opacity: 0;
+  }
+}
+
+/* Bouncing dots */
+@keyframes dotBounce {
+  0%, 20% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+  60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+}
+
+/* Floating motion for decorative elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Gentle sway for the catalog stack */
+@keyframes sway {
+  0%, 100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+/* Spin with easing for the outer ring */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -912,7 +912,7 @@ export default function AdminDashboard() {
                   />
                   <Image
                     src={product.imageUrl}
-                    alt={product.name}
+                    alt={product.name || "Product image"}
                     width={400}
                     height={300}
                     className="w-full h-48 object-cover"
@@ -1017,7 +1017,7 @@ export default function AdminDashboard() {
                           <div className="flex-shrink-0 h-10 w-10">
                             <Image
                               src={product.imageUrl}
-                              alt={product.name}
+                              alt={product.name || "Product thumbnail"}
                               width={40}
                               height={40}
                               className="h-10 w-10 rounded-lg object-cover"

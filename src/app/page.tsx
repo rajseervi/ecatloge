@@ -6,6 +6,8 @@ import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '@/types/company';
 import Image from 'next/image';
 import Link from 'next/link';
 import CatalogHeader, { type CatalogHeaderConfig } from '@/components/CatalogHeader';
+import SearchLoader from '@/components/SearchLoader';
+import CatalogLoader from '@/components/CatalogLoader';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
 export const dynamic = 'force-dynamic';
@@ -121,14 +123,7 @@ export default function Catalog() {
 
   /* ── loading screen ──────── */
   if (loading && isInitialLoad) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin" />
-        </div>
-        <p className="mt-6 text-sm font-medium text-gray-500">Loading catalog...</p>
-      </div>
-    );
+    return <CatalogLoader />;
   }
 
   return (
@@ -194,22 +189,9 @@ export default function Catalog() {
   /*  RENDER PRODUCTS                                                 */
   /* ================================================================ */
   function renderProducts() {
-    // Loading skeleton (incremental)
+    // Loading skeleton (incremental) — polished search loader
     if (loading && !isInitialLoad) {
-      return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" role="status" aria-live="polite">
-          {[...Array(limit)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
-              <div className="w-full aspect-square bg-gray-100" />
-              <div className="p-4 space-y-2">
-                <div className="h-4 bg-gray-100 rounded w-3/4" />
-                <div className="h-3 bg-gray-100 rounded w-1/2" />
-                <div className="h-8 bg-gray-100 rounded mt-3" />
-              </div>
-            </div>
-          ))}
-        </div>
-      );
+      return <SearchLoader count={limit} />;
     }
 
     // Empty state
@@ -250,7 +232,7 @@ export default function Catalog() {
                 <div className="relative overflow-hidden bg-gray-50">
                   <Image
                     src={product.imageUrl}
-                    alt={product.name}
+                    alt={product.name || "Product"}
                     width={300}
                     height={300}
                     className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"

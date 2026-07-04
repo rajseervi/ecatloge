@@ -101,8 +101,8 @@ export default function InventoryDashboard() {
           bValue = b.price * b.inventory;
           break;
         default:
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aValue = (a.name || "").toLowerCase();
+          bValue = (b.name || "").toLowerCase();
       }
 
       if (typeof aValue === 'string' && typeof bValue === 'string') {
@@ -316,7 +316,7 @@ export default function InventoryDashboard() {
                           <div className="flex-shrink-0 h-10 w-10">
                             <Image
                               src={product.imageUrl}
-                              alt={product.name}
+                              alt={product.name || "Product thumbnail"}
                               width={40}
                               height={40}
                               className="h-10 w-10 rounded-lg object-cover"

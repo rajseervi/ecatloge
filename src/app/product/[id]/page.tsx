@@ -196,7 +196,7 @@ function ProductContent() {
               )}
               <Image
                 src={product.imageUrl}
-                alt={product.name}
+                alt={product.name || "Product detail"}
                 fill
                 className={`object-cover transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 onLoad={() => setImageLoaded(true)}
@@ -333,7 +333,7 @@ function ProductContent() {
                   <div className="relative overflow-hidden bg-gray-50">
                     <Image
                       src={rp.imageUrl}
-                      alt={rp.name}
+                      alt={rp.name || "Related product"}
                       width={200}
                       height={200}
                       className="w-full aspect-square object-cover transition-all duration-500 group-hover:scale-105"
