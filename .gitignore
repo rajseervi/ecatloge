@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.zencoder
 /.pnp
 .pnp.*
 .yarn/*

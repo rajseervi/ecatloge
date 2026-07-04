@@ -15,7 +15,7 @@ function ProductContent() {
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [company] = useState<CompanyProfile>(DEFAULT_COMPANY_PROFILE);
+  const [company, setCompany] = useState<CompanyProfile>(DEFAULT_COMPANY_PROFILE);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const { isScrolled } = useScrollBehavior();
@@ -31,6 +31,11 @@ function ProductContent() {
           // API returns { company: {...}, product: {...} } for single product fetch
           const fetchedProduct = productData.product || productData;
           setProduct(fetchedProduct);
+
+          // Fetch company profile from API response or separately
+          if (productData.company) {
+            setCompany((prev) => ({ ...prev, ...productData.company }));
+          }
 
           // Fetch related products (same category, excluding current)
           if (fetchedProduct.category) {
@@ -55,7 +60,22 @@ function ProductContent() {
         setLoading(false);
       }
     };
+
+    // Also fetch company profile independently
+    const fetchCompany = async () => {
+      try {
+        const res = await fetch("/api/company");
+        const data = await res.json();
+        if (res.ok && data.company) {
+          setCompany((prev) => ({ ...prev, ...data.company }));
+        }
+      } catch {
+        // fallback
+      }
+    };
+
     fetchData();
+    fetchCompany();
   }, [id]);
 
   const handleSearchChange = (value: string) => {

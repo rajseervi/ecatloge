@@ -22,11 +22,27 @@ export default function Catalog() {
   const [categories, setCategories] = useState<string[]>(['all']);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isSearching, setIsSearching] = useState(false);
-  const [company] = useState<CompanyProfile>(DEFAULT_COMPANY_PROFILE);
+  const [company, setCompany] = useState<CompanyProfile>(DEFAULT_COMPANY_PROFILE);
 
   const limit = 24;
 
   const { isScrolled } = useScrollBehavior();
+
+  /* ── fetch company profile ── */
+  useEffect(() => {
+    const fetchCompany = async () => {
+      try {
+        const res = await fetch("/api/company");
+        const data = await res.json();
+        if (res.ok && data.company) {
+          setCompany((prev) => ({ ...prev, ...data.company }));
+        }
+      } catch {
+        // fallback to defaults
+      }
+    };
+    fetchCompany();
+  }, []);
 
   /* ── debounce search ─────── */
   useEffect(() => {
