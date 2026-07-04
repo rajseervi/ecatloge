@@ -91,6 +91,7 @@ function ProductContent() {
 
   const headerConfig: CatalogHeaderConfig = {
     companyName: company.name,
+    tagline: company.tagline,
     totalProducts: 0,
     searchTerm,
     isSearching,

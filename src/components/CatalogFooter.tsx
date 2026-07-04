@@ -42,9 +42,11 @@ export default function CatalogFooter() {
                 company.description
               ) : (
                 <>
-                  is a trusted supplier of premium bath fittings, sanitaryware, and plumbing
-                  solutions across the region. Since 2010, we have been delivering quality products
-                  backed by reliable service to contractors, retailers, and homeowners alike.
+                  is a trusted supplier of premium bath fittings, sanitaryware, plumbing items,
+                  water storage tanks, and related solutions across the region. We carry leading
+                  brands like <strong className="text-slate-300">Ashirvad</strong>, Hindware, and
+                  Watertec — delivering quality products backed by reliable service to contractors,
+                  retailers, and homeowners alike.
                 </>
               )}
             </p>
@@ -70,6 +72,12 @@ export default function CatalogFooter() {
               <li>
                 <span className="flex items-center gap-2 text-sm text-slate-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                  <strong className="text-slate-300">Ashirvad</strong> — Pipes & Water Tanks
+                </span>
+              </li>
+              <li>
+                <span className="flex items-center gap-2 text-sm text-slate-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
                   Hindware Sanitaryware
                 </span>
               </li>
@@ -88,12 +96,21 @@ export default function CatalogFooter() {
               <li>
                 <span className="flex items-center gap-2 text-sm text-slate-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
-                  Pipes & Accessories
+                  Water Storage Tanks
+                </span>
+              </li>
+              <li>
+                <span className="flex items-center gap-2 text-sm text-slate-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                  Plumbing & Sanitaryware
                 </span>
               </li>
             </ul>
-            {/* Brand logos placeholder */}
-            <div className="mt-5 flex items-center gap-3">
+            {/* Brand logos */}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-900/30 px-2.5 py-1 rounded ring-1 ring-emerald-700/30">
+                Ashirvad
+              </span>
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-800 px-2.5 py-1 rounded">
                 Hindware
               </span>
@@ -116,7 +133,7 @@ export default function CatalogFooter() {
                 <div>
                   <p className="text-sm text-slate-200 font-medium">Authorized Distributor</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Hindware & Watertec certified partner
+                    Ashirvad, Hindware & Watertec certified partner
                   </p>
                 </div>
               </li>
@@ -172,10 +189,10 @@ export default function CatalogFooter() {
                   <p className="text-sm text-slate-200 font-medium">Warehouse / Office</p>
                   <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
                     {company.address
-                      ? company.address.split(", ").map((line, i) => (
+                      ? company.address.split("\n").map((line, i) => (
                           <span key={i}>
-                            {line}
-                            {i < company.address.split(", ").length - 1 && <br />}
+                            {line.trim()}
+                            {i < company.address.split("\n").length - 1 && <br />}
                           </span>
                         ))
                       : "123, Industrial Area, Main Road"}
@@ -244,7 +261,7 @@ export default function CatalogFooter() {
             {/* Copyright */}
             <p className="text-xs text-slate-500 text-center sm:text-left">
               &copy; {currentYear} <span className="text-slate-400 font-medium">{company.name}</span>.
-              All rights reserved. | An authorized distributor of Hindware & Watertec.
+              All rights reserved. | An authorized distributor of Ashirvad, Hindware & Watertec.
             </p>
 
             {/* Footer links */}

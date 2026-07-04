@@ -115,6 +115,7 @@ export default function Catalog() {
 
   const headerConfig: CatalogHeaderConfig = {
     companyName: company.name,
+    tagline: company.tagline,
     totalProducts,
     searchTerm,
     isSearching,
