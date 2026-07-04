@@ -8,6 +8,7 @@ import Link from 'next/link';
 import CatalogHeader, { type CatalogHeaderConfig } from '@/components/CatalogHeader';
 import SearchLoader from '@/components/SearchLoader';
 import CatalogLoader from '@/components/CatalogLoader';
+import CatalogHero from '@/components/CatalogHero';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
 export const dynamic = 'force-dynamic';
@@ -134,6 +135,9 @@ export default function Catalog() {
         onSearchChange={handleSearchChange}
         onClearSearch={handleClearSearch}
       />
+
+      {/* Hero Section — SEO rich */}
+      <CatalogHero companyName={company.name} phone={company.phone} />
 
       {/* Category Filter */}
       <div className="bg-white border-b border-gray-200">

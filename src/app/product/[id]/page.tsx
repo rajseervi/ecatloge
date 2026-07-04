@@ -9,6 +9,8 @@ import Link from 'next/link';
 import CatalogHeader, { type CatalogHeaderConfig } from '@/components/CatalogHeader';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vishnuagency.co.in/";
+
 function ProductContent() {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
@@ -22,19 +24,32 @@ function ProductContent() {
   const router = useRouter();
 
   useEffect(() => {
+    // Update document title dynamically based on product
     const fetchData = async () => {
       if (typeof id !== 'string') return;
       try {
         const productResponse = await fetch(`/api/products?id=${id}`);
         if (productResponse.ok) {
           const productData = await productResponse.json();
-          // API returns { company: {...}, product: {...} } for single product fetch
           const fetchedProduct = productData.product || productData;
           setProduct(fetchedProduct);
 
-          // Fetch company profile from API response or separately
           if (productData.company) {
             setCompany((prev) => ({ ...prev, ...productData.company }));
+          }
+
+          // Update page title
+          if (fetchedProduct?.name) {
+            document.title = `${fetchedProduct.name} | Rupa Marketing Hyderabad`;
+          }
+
+          // Update meta description
+          const metaDesc = document.querySelector('meta[name="description"]');
+          if (metaDesc && fetchedProduct?.description) {
+            metaDesc.setAttribute(
+              "content",
+              `${fetchedProduct.name} - ${fetchedProduct.description?.slice(0, 160)}. Available at Rupa Marketing, Hyderabad.`
+            );
           }
 
           // Fetch related products (same category, excluding current)
@@ -61,7 +76,6 @@ function ProductContent() {
       }
     };
 
-    // Also fetch company profile independently
     const fetchCompany = async () => {
       try {
         const res = await fetch("/api/company");
@@ -161,26 +175,48 @@ function ProductContent() {
     <div className="min-h-screen bg-gray-50">
       <CatalogHeader config={headerConfig} onSearchChange={handleSearchChange} onClearSearch={handleClearSearch} />
 
-      {/* Breadcrumb Nav */}
+      {/* Breadcrumb Nav — good for SEO */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-14 gap-2 text-sm">
-            <Link href="/" className="text-gray-400 hover:text-gray-600 transition-colors font-medium">
-              Catalog
-            </Link>
-            <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-            {product.category && (
-              <>
-                <span className="text-gray-400 font-medium">{product.category}</span>
+          <nav aria-label="Breadcrumb">
+            <ol className="flex items-center h-14 gap-2 text-sm">
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-gray-600 transition-colors font-medium">
+                  Home
+                </Link>
+              </li>
+              <li>
                 <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </>
-            )}
-            <span className="text-gray-900 font-semibold truncate">{product.name}</span>
-          </div>
+              </li>
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-gray-600 transition-colors font-medium">
+                  Plumbing Catalog
+                </Link>
+              </li>
+              {product.category && (
+                <>
+                  <li>
+                    <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </li>
+                  <li>
+                    <span className="text-gray-400 font-medium">{product.category}</span>
+                  </li>
+                </>
+              )}
+              <li>
+                <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </li>
+              <li>
+                <span className="text-gray-900 font-semibold truncate" aria-current="page">{product.name}</span>
+              </li>
+            </ol>
+          </nav>
         </div>
       </div>
 
@@ -197,7 +233,7 @@ function ProductContent() {
               )}
               <Image
                 src={product.imageUrl}
-                alt={product.name || "Product detail"}
+                alt={`${product.name} – Plumbing product at Rupa Marketing Hyderabad`}
                 fill
                 className={`object-cover transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 onLoad={() => setImageLoaded(true)}
@@ -205,10 +241,8 @@ function ProductContent() {
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
               />
-              {/* Overlay gradient */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/[0.02] to-transparent pointer-events-none" />
             </div>
-            {/* Stock badge on image */}
             <div className={`absolute top-4 right-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ring-1 shadow-sm ${stockInfo.color}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${stockInfo.dot}`} />
               {stockInfo.label}
@@ -225,7 +259,6 @@ function ProductContent() {
               {product.category}
             </div>
 
-            {/* Name */}
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
               {product.name}
             </h1>
@@ -259,7 +292,6 @@ function ProductContent() {
               </div>
             )}
 
-            {/* Divider */}
             <hr className="my-6 border-gray-100" />
 
             {/* Description */}
@@ -270,7 +302,6 @@ function ProductContent() {
               </div>
             </div>
 
-            {/* Divider */}
             <hr className="my-6 border-gray-100" />
 
             {/* Product Meta */}
@@ -290,7 +321,7 @@ function ProductContent() {
               <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <div className="flex items-center gap-4">
                   <div className="bg-white p-2 rounded-lg shadow-sm">
-                    <Image src={product.qrCode} alt="QR Code" width={64} height={64} className="rounded" />
+                    <Image src={product.qrCode} alt={`QR Code for ${product.name}`} width={64} height={64} className="rounded" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900">QR Code</p>
@@ -300,8 +331,18 @@ function ProductContent() {
               </div>
             )}
 
-            {/* Actions */}
+            {/* Contact CTA */}
             <div className="mt-auto pt-6 space-y-3">
+              <a
+                href={`tel:${company.phone.replace(/\s+/g, "")}`}
+                className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                aria-label={`Call Rupa Marketing Hyderabad about ${product.name}`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                Call for price & availability
+              </a>
               <Link
                 href={`/?category=${product.category || ''}`}
                 className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
@@ -309,7 +350,7 @@ function ProductContent() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Browse more {product.category?.toLowerCase() || 'products'}
+                Browse more {product.category?.toLowerCase() || 'plumbing products'}
               </Link>
             </div>
           </div>
@@ -319,9 +360,9 @@ function ProductContent() {
         {relatedProducts.length > 0 && (
           <div className="mt-16 lg:mt-20">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">You might also like</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Related Plumbing Products</h2>
               <Link href="/" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
-                View all →
+                View all products →
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
@@ -334,7 +375,7 @@ function ProductContent() {
                   <div className="relative overflow-hidden bg-gray-50">
                     <Image
                       src={rp.imageUrl}
-                      alt={rp.name || "Related product"}
+                      alt={`${rp.name} – Plumbing & sanitaryware`}
                       width={200}
                       height={200}
                       className="w-full aspect-square object-cover transition-all duration-500 group-hover:scale-105"
@@ -356,6 +397,36 @@ function ProductContent() {
           </div>
         )}
       </div>
+
+      {/* JSON-LD structured data for this product */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            description: product.description?.slice(0, 200),
+            image: product.imageUrl,
+            category: product.category,
+            sku: product.id,
+            offers: {
+              "@type": "Offer",
+              price: product.price || 0,
+              priceCurrency: "INR",
+              availability: product.inventory > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+              seller: {
+                "@type": "LocalBusiness",
+                name: "Rupa Marketing",
+                url: siteUrl,
+                telephone: company.phone,
+              },
+            },
+          }),
+        }}
+      />
     </div>
   );
 }
