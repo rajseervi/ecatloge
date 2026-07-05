@@ -1,8 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import { Product } from "@/types/product";
 import Image from "next/image";
 import Link from "next/link";
+
+const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='%23e5e7eb'%3E%3Crect width='40' height='40'/%3E%3Ctext x='50%25' y='50%25' fill='%239ca3af' font-family='sans-serif' font-size='7' text-anchor='middle' dominant-baseline='central'%3EN/A%3C/text%3E%3C/svg%3E";
+
+function TableImage({ src, alt }: { src: string; alt: string }) {
+  const [error, setError] = useState(false);
+
+  if (error || !src) {
+    return <img src={FALLBACK_IMG} alt="" className="h-full w-full object-cover" />;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={40}
+      height={40}
+      className="h-full w-full object-cover"
+      onError={() => setError(true)}
+    />
+  );
+}
 
 interface ProductTableViewProps {
   products: Product[];
@@ -10,7 +32,6 @@ interface ProductTableViewProps {
   onToggleSelect: (id: string) => void;
   onSelectAll: () => void;
   onClearSelection: () => void;
-  onEdit: (product: Product) => void;
 }
 
 export default function ProductTableView({
@@ -19,7 +40,6 @@ export default function ProductTableView({
   onToggleSelect,
   onSelectAll,
   onClearSelection,
-  onEdit,
 }: ProductTableViewProps) {
   const allSelected = products.length > 0 && selectedProducts.length === products.length;
 
@@ -64,9 +84,9 @@ export default function ProductTableView({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {products.map((product) => (
+            {products.map((product, index) => (
               <tr
-                key={product.id}
+                key={product.id || `table-product-${index}`}
                 className={`hover:bg-gray-50 transition-colors ${
                   selectedProducts.includes(product.id) ? "bg-indigo-50/50" : ""
                 }`}
@@ -82,13 +102,7 @@ export default function ProductTableView({
                 <td className="px-5 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl overflow-hidden bg-gray-50 shrink-0">
-                      <Image
-                        src={product.imageUrl}
-                        alt={product.name || "Product thumbnail"}
-                        width={40}
-                        height={40}
-                        className="h-full w-full object-cover"
-                      />
+                      <TableImage src={product.imageUrl} alt={product.name || "Product thumbnail"} />
                     </div>
                     <div className="min-w-0">
                       <div className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">{product.name}</div>
@@ -147,12 +161,12 @@ export default function ProductTableView({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap text-sm">
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => onEdit(product)}
+                    <Link
+                      href={`/admin/products/edit/${product.id}`}
                       className="px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
                     >
                       Edit
-                    </button>
+                    </Link>
                     <Link
                       href={`/product/${product.id}`}
                       className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"

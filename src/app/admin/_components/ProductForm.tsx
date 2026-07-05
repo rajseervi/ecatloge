@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { Product } from "@/types/product";
 
 interface ProductFormProps {
@@ -30,6 +31,9 @@ export default function ProductForm({
   onChange,
   onCancel,
 }: ProductFormProps) {
+  const fallbackRef = useRef<HTMLDivElement>(null);
+  const [previewError, setPreviewError] = useState(false);
+
   return (
     <div className="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-100">
       <div className="flex items-center gap-3 mb-6">
@@ -106,6 +110,26 @@ export default function ProductForm({
               placeholder="https://example.com/image.jpg"
               required
             />
+            {/* Live image preview */}
+            {form.imageUrl && (
+              <div className="mt-3 relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                {previewError && (
+                  <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
+                    Unable to load image
+                  </div>
+                )}
+                {!previewError && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={form.imageUrl}
+                    alt="Preview"
+                    className="w-full h-40 object-contain"
+                    onError={() => setPreviewError(true)}
+                    onLoad={() => setPreviewError(false)}
+                  />
+                )}
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">

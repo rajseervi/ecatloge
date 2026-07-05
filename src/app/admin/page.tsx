@@ -523,7 +523,6 @@ export default function AdminDashboard() {
           products={sortedProducts}
           selectedProducts={selectedProducts}
           onToggleSelect={toggleSelection}
-          onEdit={handleEdit}
         />
       ) : (
         <ProductTableView
@@ -532,7 +531,6 @@ export default function AdminDashboard() {
           onToggleSelect={toggleSelection}
           onSelectAll={selectAll}
           onClearSelection={clearSelection}
-          onEdit={handleEdit}
         />
       )}
 

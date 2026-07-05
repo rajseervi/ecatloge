@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Product } from "@/types/product";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,8 +9,9 @@ interface ProductGridViewProps {
   products: Product[];
   selectedProducts: string[];
   onToggleSelect: (id: string) => void;
-  onEdit: (product: Product) => void;
 }
+
+const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23e5e7eb'%3E%3Crect width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' fill='%239ca3af' font-family='sans-serif' font-size='16' text-anchor='middle' dominant-baseline='central'%3ENo Image%3C/text%3E%3C/svg%3E";
 
 function StockBadge({ inventory }: { inventory: number }) {
   if (inventory === 0) {
@@ -29,34 +31,50 @@ function StockBadge({ inventory }: { inventory: number }) {
   return null;
 }
 
+function ProductImage({ src, alt }: { src: string; alt: string }) {
+  const [error, setError] = useState(false);
+
+  if (error || !src) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs font-medium">
+        <img src={FALLBACK_IMG} alt="" className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={400}
+      height={300}
+      className="w-full h-full object-cover"
+      onError={() => setError(true)}
+    />
+  );
+}
+
 export default function ProductGridView({
   products,
   selectedProducts,
   onToggleSelect,
-  onEdit,
 }: ProductGridViewProps) {
   if (products.length === 0) return null;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-      {products.map((product) => {
+      {products.map((product, index) => {
         const isSelected = selectedProducts.includes(product.id);
         return (
           <div
-            key={product.id}
+            key={product.id || `product-${index}`}
             className={`group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border ${
               isSelected ? "border-indigo-400 ring-2 ring-indigo-200" : "border-gray-100"
             }`}
           >
             {/* Image */}
             <div className="relative h-48 bg-gray-50">
-              <Image
-                src={product.imageUrl}
-                alt={product.name || "Product image"}
-                width={400}
-                height={300}
-                className="w-full h-full object-cover"
-              />
+              <ProductImage src={product.imageUrl} alt={product.name || "Product image"} />
               <StockBadge inventory={product.inventory} />
               {product.hidden && (
                 <div className="absolute bottom-3 left-3 bg-gray-900/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
@@ -97,12 +115,12 @@ export default function ProductGridView({
               </div>
 
               <div className="flex gap-2">
-                <button
-                  onClick={() => onEdit(product)}
-                  className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                <Link
+                  href={`/admin/products/edit/${product.id}`}
+                  className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg text-center"
                 >
                   Edit
-                </button>
+                </Link>
                 <Link
                   href={`/product/${product.id}`}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl text-sm font-semibold transition-colors text-center"

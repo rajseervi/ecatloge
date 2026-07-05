@@ -93,8 +93,8 @@ export default function StockAlerts({ products }: StockAlertsProps) {
             <p className="text-sm font-medium text-gray-500">Nothing to show here</p>
           </div>
         ) : (
-          filtered.slice(0, 15).map((product) => (
-            <div key={product.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
+          filtered.slice(0, 15).map((product, index) => (
+            <div key={product.id || `stock-alert-${index}`} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
               <div className="h-10 w-10 rounded-xl overflow-hidden bg-gray-50 shrink-0">
                 <img
                   src={product.imageUrl}

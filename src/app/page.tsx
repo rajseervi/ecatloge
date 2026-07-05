@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Product, ProductListResponse } from '@/types/product';
+import { Banner } from '@/types/banner';
 import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '@/types/company';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,6 +10,7 @@ import CatalogHeader, { type CatalogHeaderConfig } from '@/components/CatalogHea
 import SearchLoader from '@/components/SearchLoader';
 import CatalogLoader from '@/components/CatalogLoader';
 import CatalogHero from '@/components/CatalogHero';
+import HeroSlider from '@/components/HeroSlider';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
 export const dynamic = 'force-dynamic';
@@ -26,8 +28,12 @@ export default function Catalog() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isSearching, setIsSearching] = useState(false);
   const [company, setCompany] = useState<CompanyProfile>(DEFAULT_COMPANY_PROFILE);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [bannersLoaded, setBannersLoaded] = useState(false);
+  const productsRef = useRef<HTMLDivElement>(null);
 
   const limit = 24;
+  const hasActiveSearch = debouncedSearch.length > 0 || selectedCategory !== 'all';
 
   const { isScrolled } = useScrollBehavior();
 
@@ -47,6 +53,24 @@ export default function Catalog() {
     fetchCompany();
   }, []);
 
+  /* ── fetch banners ───────── */
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await fetch("/api/banners");
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.banners)) {
+          setBanners(data.banners);
+        }
+      } catch {
+        // no banners — fallback to static hero
+      } finally {
+        setBannersLoaded(true);
+      }
+    };
+    fetchBanners();
+  }, []);
+
   /* ── debounce search ─────── */
   useEffect(() => {
     setIsSearching(true);
@@ -57,6 +81,13 @@ export default function Catalog() {
     }, 300);
     return () => { clearTimeout(t); setIsSearching(false); };
   }, [searchTerm]);
+
+  /* ── scroll to products when search changes ── */
+  useEffect(() => {
+    if (!isInitialLoad && productsRef.current) {
+      productsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [debouncedSearch, selectedCategory, isInitialLoad]);
 
   /* ── fetch products ──────── */
   useEffect(() => {
@@ -136,52 +167,59 @@ export default function Catalog() {
         onClearSearch={handleClearSearch}
       />
 
-      {/* Hero Section — SEO rich */}
-      <CatalogHero companyName={company.name} phone={company.phone} />
+      {/* Hero Section — dynamic slider or static fallback */}
+      {bannersLoaded && banners.length > 0 ? (
+        <HeroSlider banners={banners} companyName={company.name} phone={company.phone} />
+      ) : (
+        <CatalogHero companyName={company.name} phone={company.phone} />
+      )}
 
-      {/* Category Filter */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider shrink-0">Categories</span>
-            <div className="flex gap-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => handleCategorySelect(cat)}
-                  className={`px-4 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-all duration-150 ${
-                    selectedCategory === cat
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
-                  }`}
-                >
-                  {cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </button>
-              ))}
+      {/* Products section anchor + Compact intro when searching */}
+      <div id="products" ref={productsRef}>
+        {/* Category Filter */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider shrink-0">Categories</span>
+              <div className="flex gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => handleCategorySelect(cat)}
+                    className={`px-4 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-all duration-150 ${
+                      selectedCategory === cat
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                    }`}
+                  >
+                    {cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats Bar */}
-      {!loading && products.length > 0 && (
-        <div className="px-4 sm:px-6 lg:px-8 py-3 bg-white border-b border-gray-200">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-sm text-gray-500">
-              Showing <span className="font-semibold text-gray-900">{products.length}</span> of{' '}
-              <span className="font-semibold text-gray-900">{totalProducts}</span> products
-              {debouncedSearch && (
-                <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium">
-                  &ldquo;{debouncedSearch}&rdquo;
-                </span>
-              )}
-            </p>
-            <p className="text-xs text-gray-400">
-              Page {page} of {totalPages}
-            </p>
+        {/* Stats Bar */}
+        {!loading && products.length > 0 && (
+          <div className="px-4 sm:px-6 lg:px-8 py-3 bg-white border-b border-gray-200">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="text-sm text-gray-500">
+                Showing <span className="font-semibold text-gray-900">{products.length}</span> of{' '}
+                <span className="font-semibold text-gray-900">{totalProducts}</span> products
+                {debouncedSearch && (
+                  <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium">
+                    &ldquo;{debouncedSearch}&rdquo;
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-gray-400">
+                Page {page} of {totalPages}
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Main Content */}
       <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

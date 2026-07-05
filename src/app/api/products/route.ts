@@ -272,3 +272,44 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { id } = await request.json();
+
+    if (!id) {
+      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+    }
+
+    const sheets = await getSheetsClient(['https://www.googleapis.com/auth/spreadsheets']);
+
+    // Get all data to find the row
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: FULL_RANGE,
+    });
+
+    const rows = response.data.values || [];
+    const rowIndex = rows.findIndex((row, index) => index > 0 && row[0] === id); // Skip header row
+
+    if (rowIndex === -1) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    // Clear the row contents (sheets API doesn't support row deletion easily, clear instead)
+    const deleteRange = `Sheet1!A${rowIndex + 2}:I${rowIndex + 2}`;
+    await sheets.spreadsheets.values.clear({
+      spreadsheetId: SHEET_ID,
+      range: deleteRange,
+    });
+
+    return NextResponse.json({ success: true, message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({
+      error: 'Failed to delete product',
+      details: errorMessage
+    }, { status: 500 });
+  }
+}
