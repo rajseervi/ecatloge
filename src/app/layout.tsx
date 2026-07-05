@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import CatalogFooter from "@/components/CatalogFooter";
@@ -91,6 +92,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-IN">
+      <head>
+        {/* Google tag (gtag.js) */}
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-P8F4CTYNES"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-P8F4CTYNES');
+          `}
+        </Script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
@@ -103,7 +120,7 @@ export default function RootLayout({
               name: "Vishnu Agency, Patancheru",
               image: `${siteUrl}/og-image.png`,
               url: siteUrl,
-              telephone: "+91-0000000000",
+              telephone: "+91-9828953495",
               email: "hello@vishnuagency.co.in",
               description:
                 "Authorized distributor of Ashirvad pipes, Hindware sanitaryware, and Watertec bath fittings in Hyderabad. We provide premium plumbing solutions, water storage tanks, and sanitaryware.",
