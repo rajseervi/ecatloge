@@ -40,7 +40,7 @@ function ProductContent() {
 
           // Update page title
           if (fetchedProduct?.name) {
-            document.title = `${fetchedProduct.name} | Rupa Marketing Hyderabad`;
+            document.title = `${fetchedProduct.name} | Vishnu Agency Wholesale Pipes & Fittings Supplier`;
           }
 
           // Update meta description
@@ -48,7 +48,7 @@ function ProductContent() {
           if (metaDesc && fetchedProduct?.description) {
             metaDesc.setAttribute(
               "content",
-              `${fetchedProduct.name} - ${fetchedProduct.description?.slice(0, 160)}. Available at Rupa Marketing, Hyderabad.`
+              `${fetchedProduct.name} - ${fetchedProduct.description?.slice(0, 160)}. Available at Vishnu Agency Wholesale Pipes & Fittings Supplier.`
             );
           }
 
@@ -233,7 +233,7 @@ function ProductContent() {
               )}
               <Image
                 src={product.imageUrl}
-                alt={`${product.name} – Plumbing product at Rupa Marketing Hyderabad`}
+                alt={`${product.name} – Plumbing product at Vishnu Agency Wholesale Pipes & Fittings Supplier`}
                 fill
                 className={`object-cover transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 onLoad={() => setImageLoaded(true)}
@@ -336,7 +336,7 @@ function ProductContent() {
               <a
                 href={`tel:${company.phone.replace(/\s+/g, "")}`}
                 className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
-                aria-label={`Call Rupa Marketing Hyderabad about ${product.name}`}
+                aria-label={`Call Vishnu Agency Wholesale Pipes & Fittings Supplier about ${product.name}`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -419,7 +419,7 @@ function ProductContent() {
                 : "https://schema.org/OutOfStock",
               seller: {
                 "@type": "LocalBusiness",
-                name: "Rupa Marketing",
+                name: "Vishnu Agency Wholesale Pipes & Fittings Supplier",
                 url: siteUrl,
                 telephone: company.phone,
               },
