@@ -11,14 +11,13 @@ interface HeroSliderProps {
   phone: string;
 }
 
-export default function HeroSlider({ banners, companyName, phone }: HeroSliderProps) {
+export default function HeroSlider({ banners }: HeroSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [slideKey, setSlideKey] = useState(0);
-  const [direction, setDirection] = useState<"left" | "right">("right");
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -27,27 +26,20 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
 
   const goToSlide = useCallback((index: number) => {
     const newIndex = ((index % totalSlides) + totalSlides) % totalSlides;
-    setDirection(newIndex > currentSlide || (newIndex === 0 && currentSlide === totalSlides - 1) ? "right" : "left");
     setCurrentSlide(newIndex);
     setSlideKey((k) => k + 1);
-  }, [totalSlides, currentSlide]);
+  }, [totalSlides]);
 
   const goNext = useCallback(() => {
-    setDirection("right");
-    setCurrentSlide((prev) => {
-      const next = (prev + 1) % totalSlides;
-      return next;
-    });
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
     setSlideKey((k) => k + 1);
   }, [totalSlides]);
 
   const goPrev = useCallback(() => {
-    setDirection("left");
     setCurrentSlide((prev) => ((prev - 1) % totalSlides + totalSlides) % totalSlides);
     setSlideKey((k) => k + 1);
   }, [totalSlides]);
 
-  // Autoplay
   useEffect(() => {
     if (!isAutoPlaying || totalSlides <= 1) return;
     intervalRef.current = setInterval(goNext, 5000);
@@ -56,12 +48,18 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
     };
   }, [isAutoPlaying, totalSlides, goNext]);
 
-  // Resume autoplay after inactivity
   const resumeAutoplay = useCallback(() => {
     setTimeout(() => setIsAutoPlaying(true), 8000);
   }, []);
 
-  // Touch handlers
+  const handleSwipe = useCallback((distance: number) => {
+    const threshold = 50;
+    if (Math.abs(distance) > threshold) {
+      if (distance > 0) goNext();
+      else goPrev();
+    }
+  }, [goNext, goPrev]);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.touches[0].clientX);
     setIsDragging(true);
@@ -74,16 +72,10 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-    const threshold = 50;
-    const swipeDistance = touchStart - touchEnd;
-    if (Math.abs(swipeDistance) > threshold) {
-      if (swipeDistance > 0) { setDirection("right"); goNext(); }
-      else { setDirection("left"); goPrev(); }
-    }
+    handleSwipe(touchStart - touchEnd);
     resumeAutoplay();
   };
 
-  // Mouse drag support
   const handleMouseDown = (e: React.MouseEvent) => {
     setTouchStart(e.clientX);
     setIsDragging(true);
@@ -97,28 +89,20 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    const threshold = 50;
-    const swipeDistance = touchStart - touchEnd;
-    if (Math.abs(swipeDistance) > threshold) {
-      if (swipeDistance > 0) { setDirection("right"); goNext(); }
-      else { setDirection("left"); goPrev(); }
-    }
+    handleSwipe(touchStart - touchEnd);
     resumeAutoplay();
   };
 
-  // Keyboard nav
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") { setDirection("left"); goPrev(); setIsAutoPlaying(false); resumeAutoplay(); }
-      if (e.key === "ArrowRight") { setDirection("right"); goNext(); setIsAutoPlaying(false); resumeAutoplay(); }
+      if (e.key === "ArrowLeft") { goPrev(); setIsAutoPlaying(false); resumeAutoplay(); }
+      if (e.key === "ArrowRight") { goNext(); setIsAutoPlaying(false); resumeAutoplay(); }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goPrev, goNext, resumeAutoplay]);
 
-  if (totalSlides === 0) {
-    return null;
-  }
+  if (totalSlides === 0) return null;
 
   return (
     <section
@@ -128,7 +112,6 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
       role="region"
       aria-roledescription="carousel"
     >
-      {/* Slides track */}
       <div
         ref={trackRef}
         className="flex transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] cursor-grab active:cursor-grabbing"
@@ -168,15 +151,12 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
                 )}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
 
-                {/* Animated content */}
                 <div className="absolute inset-0 flex items-center">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                     <div
                       key={`content-${slideKey}-${index}`}
                       className={`max-w-xl lg:max-w-2xl transition-all duration-700 ease-out ${
-                        isActive
-                          ? "opacity-100 translate-y-0"
-                          : "opacity-0 translate-y-8"
+                        isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                       }`}
                       style={{ transitionDelay: isActive ? "150ms" : "0ms" }}
                     >
@@ -234,11 +214,10 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
         })}
       </div>
 
-      {/* Navigation arrows */}
       {totalSlides > 1 && (
         <>
           <button
-            onClick={() => { setDirection("left"); goPrev(); setIsAutoPlaying(false); resumeAutoplay(); }}
+            onClick={() => { goPrev(); setIsAutoPlaying(false); resumeAutoplay(); }}
             className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 hover:bg-white/30 shadow-lg opacity-0 group-hover:opacity-100 lg:opacity-100"
             aria-label="Previous slide"
           >
@@ -247,7 +226,7 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
             </svg>
           </button>
           <button
-            onClick={() => { setDirection("right"); goNext(); setIsAutoPlaying(false); resumeAutoplay(); }}
+            onClick={() => { goNext(); setIsAutoPlaying(false); resumeAutoplay(); }}
             className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 hover:bg-white/30 shadow-lg lg:opacity-100"
             aria-label="Next slide"
           >
@@ -258,7 +237,6 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
         </>
       )}
 
-      {/* Dots */}
       {totalSlides > 1 && (
         <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
           {banners.map((_, index) => (
@@ -276,7 +254,6 @@ export default function HeroSlider({ banners, companyName, phone }: HeroSliderPr
         </div>
       )}
 
-      {/* Progress bar — CSS animation based fill */}
       {totalSlides > 1 && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-10">
           <div

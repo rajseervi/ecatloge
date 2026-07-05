@@ -188,7 +188,7 @@ export default function ProductForm({
           </div>
           <div>
             <span className="text-sm font-medium text-gray-900">Hide product from catalog</span>
-            <p className="text-xs text-gray-500">Hidden products won't appear in the public catalog</p>
+            <p className="text-xs text-gray-500">Hidden products are not visible in the public catalog</p>
           </div>
         </label>
 

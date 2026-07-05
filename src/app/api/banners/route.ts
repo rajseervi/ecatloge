@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
 }
 
 /** Utility: ensure the Banners sheet exists, create it if not */
-async function ensureBannersSheet(sheets: any) {
+async function ensureBannersSheet(sheets: ReturnType<typeof google.sheets>) {
   try {
     // Try reading headers — will throw if sheet doesn't exist
     await sheets.spreadsheets.values.get({

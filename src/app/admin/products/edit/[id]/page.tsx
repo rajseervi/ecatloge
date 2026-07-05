@@ -29,7 +29,6 @@ export default function EditProductPage() {
     hidden: false,
   });
 
-  // Fetch product
   useEffect(() => {
     if (!id) return;
     const fetchProduct = async () => {
@@ -54,7 +53,6 @@ export default function EditProductPage() {
           hidden: p.hidden || false,
         });
 
-        // Load all categories
         const catRes = await fetch("/api/products?limit=1&includeHidden=true");
         const catData = await catRes.json();
         if (catRes.ok && catData.categories) {
@@ -102,7 +100,6 @@ export default function EditProductPage() {
     router.push("/admin");
   };
 
-  // Loading
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -114,7 +111,6 @@ export default function EditProductPage() {
     );
   }
 
-  // Not found
   if (notFound || !product) {
     return (
       <div className="max-w-lg mx-auto text-center py-16">
@@ -124,7 +120,7 @@ export default function EditProductPage() {
           </svg>
         </div>
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Product not found</h2>
-        <p className="text-sm text-gray-500 mb-6">This product doesn't exist or has been removed.</p>
+        <p className="text-sm text-gray-500 mb-6">This product was not found or has been removed.</p>
         <Link
           href="/admin"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
@@ -140,7 +136,6 @@ export default function EditProductPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
         <Link href="/admin" className="hover:text-gray-700 transition-colors font-medium">
           Dashboard

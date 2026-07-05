@@ -65,7 +65,7 @@ function DonutChart({ categories, total }: { categories: CategoryAnalysis[]; tot
               const other = categories.slice(6);
               const otherPercentage = other.reduce((s, c) => s + c.percentage, 0);
               const angle = (otherPercentage / 100) * 360;
-              let currentAngle = categories.slice(0, 6).reduce((s, c) => s + (c.percentage / 100) * 360, -90);
+              const currentAngle = categories.slice(0, 6).reduce((s, c) => s + (c.percentage / 100) * 360, -90);
               const startAngle = currentAngle;
               const endAngle = currentAngle + angle;
 
