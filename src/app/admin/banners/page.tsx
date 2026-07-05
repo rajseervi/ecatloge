@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Banner } from "@/types/banner";
 import Image from "next/image";
+import BannerCsvExport from "@/app/admin/_components/BannerCsvExport";
 
 const EMPTY_BANNER: Omit<Banner, "id"> = {
   title: "",
@@ -207,6 +208,9 @@ export default function AdminBannersPage() {
           Add Banner
         </button>
       </div>
+
+      {/* CSV Export */}
+      <BannerCsvExport banners={sortedBanners} />
 
       {/* Form modal */}
       {showForm && (

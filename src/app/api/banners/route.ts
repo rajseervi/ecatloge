@@ -4,7 +4,6 @@ import { Banner } from '@/types/banner';
 
 const SHEET_ID = process.env.GOOGLE_SHEET_ID!;
 const BANNERS_SHEET = 'Banners';
-const BANNERS_RANGE = `${BANNERS_SHEET}!A2:I`;
 const BANNERS_FULL_RANGE = `${BANNERS_SHEET}!A:I`;
 const BANNERS_HEADERS_RANGE = `${BANNERS_SHEET}!A1:I1`;
 
@@ -31,11 +30,16 @@ async function getSheetsClient(scopes: string[]) {
   return google.sheets({ version: 'v4', auth });
 }
 
+/** Check if a row is effectively empty (no meaningful content) */
+function isRowEmpty(row: string[]): boolean {
+  // A row is empty if id, title, subtitle, description, and imageUrl are all blank
+  return !row[1]?.trim() && !row[2]?.trim() && !row[3]?.trim() && !row[4]?.trim();
+}
+
 function parseBannerRow(row: string[], index: number): Banner {
   // If id is empty, derive a unique stable id from row content hash
   let id = row[0];
   if (!id || id.trim() === '') {
-    // Hash the row content to create a deterministic unique id
     const hash = Array.from(row.join('|'))
       .reduce((acc, char) => ((acc << 5) - acc) + char.charCodeAt(0), 0)
       .toString(36)
@@ -57,6 +61,22 @@ function parseBannerRow(row: string[], index: number): Banner {
   };
 }
 
+/** Read all banner rows from the sheet, filtering out empty rows */
+async function readBanners(sheets: ReturnType<typeof google.sheets>): Promise<{ rows: string[][]; dataRowStartIndex: number }> {
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range: BANNERS_FULL_RANGE,
+  });
+
+  const allRows = response.data.values || [];
+  
+  // allRows[0] = headers row (A1:I1)
+  // subsequent rows = data
+  const dataRows = allRows.slice(1).filter((row) => !isRowEmpty(row));
+  
+  return { rows: [allRows[0] || BANNER_HEADERS, ...dataRows], dataRowStartIndex: 1 };
+}
+
 // GET /api/banners — fetch all banners
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -65,19 +85,16 @@ export async function GET(request: NextRequest) {
   try {
     const sheets = await getSheetsClient(['https://www.googleapis.com/auth/spreadsheets.readonly']);
 
-    let rows: string[][] = [];
+    let dataRows: string[][] = [];
     try {
-      const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: SHEET_ID,
-        range: BANNERS_RANGE,
-      });
-      rows = response.data.values || [];
+      const { rows } = await readBanners(sheets);
+      dataRows = rows.slice(1); // skip header
     } catch {
       // Banners sheet might not exist yet — return empty
       return NextResponse.json({ banners: [] });
     }
 
-    const banners: Banner[] = rows.map((row, i) => parseBannerRow(row, i));
+    const banners: Banner[] = dataRows.map((row, i) => parseBannerRow(row, i));
 
     // Filter active unless includeInactive is set
     const filtered = includeInactive ? banners : banners.filter((b) => b.isActive);
@@ -132,17 +149,9 @@ export async function POST(request: NextRequest) {
     // Ensure the Banners sheet exists
     await ensureBannersSheet(sheets);
 
-    // Get existing rows to determine next id
-    let existingRows: string[][] = [];
-    try {
-      const existing = await sheets.spreadsheets.values.get({
-        spreadsheetId: SHEET_ID,
-        range: BANNERS_RANGE,
-      });
-      existingRows = existing.data.values || [];
-    } catch {
-      existingRows = [];
-    }
+    // Get existing rows to determine next id and append position
+    const { rows } = await readBanners(sheets);
+    const existingDataRows = rows.slice(1); // skip header
 
     const nextId = `banner_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
@@ -160,7 +169,7 @@ export async function POST(request: NextRequest) {
           ctaText || '',
           ctaLink || '',
           isActive ? 'true' : 'false',
-          (sortOrder ?? existingRows.length).toString(),
+          (sortOrder ?? existingDataRows.length).toString(),
         ]],
       },
     });
@@ -184,19 +193,16 @@ export async function PUT(request: NextRequest) {
 
     const sheets = await getSheetsClient(['https://www.googleapis.com/auth/spreadsheets']);
 
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: BANNERS_FULL_RANGE,
-    });
-
-    const rows = response.data.values || [];
+    // Re-read with readBanners to skip empty rows
+    const { rows } = await readBanners(sheets);
+    // rows[0] = header, rows[1..N] = data
     const rowIndex = rows.findIndex((row, index) => index > 0 && row[0] === id);
 
     if (rowIndex === -1) {
       return NextResponse.json({ error: 'Banner not found' }, { status: 404 });
     }
 
-    const updateRange = `Banners!A${rowIndex + 2}:I${rowIndex + 2}`;
+    const updateRange = `Banners!A${rowIndex + 1}:I${rowIndex + 1}`;
     await sheets.spreadsheets.values.update({
       spreadsheetId: SHEET_ID,
       range: updateRange,
@@ -211,7 +217,7 @@ export async function PUT(request: NextRequest) {
           ctaText || '',
           ctaLink || '',
           isActive ? 'true' : 'false',
-          (sortOrder || rowIndex).toString(),
+          (sortOrder ?? rowIndex).toString(),
         ]],
       },
     });
@@ -221,6 +227,21 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating banner:', error);
     return NextResponse.json({ error: 'Failed to update banner' }, { status: 500 });
   }
+}
+
+/** Resolve the Banners sheet ID from the spreadsheet metadata */
+async function getBannersSheetId(sheets: ReturnType<typeof google.sheets>): Promise<number> {
+  const spreadsheet = await sheets.spreadsheets.get({
+    spreadsheetId: SHEET_ID,
+  });
+  const sheet = spreadsheet.data.sheets?.find(
+    (s) => s.properties?.title === BANNERS_SHEET
+  );
+  const sid = sheet?.properties?.sheetId;
+  if (sid === undefined || sid === null) {
+    throw new Error(`Sheet "${BANNERS_SHEET}" not found`);
+  }
+  return sid;
 }
 
 // DELETE /api/banners — deletes a banner
@@ -233,27 +254,55 @@ export async function DELETE(request: NextRequest) {
 
     const sheets = await getSheetsClient(['https://www.googleapis.com/auth/spreadsheets']);
 
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: BANNERS_FULL_RANGE,
-    });
-
-    const rows = response.data.values || [];
+    // Re-read with readBanners to get only non-empty rows
+    const { rows } = await readBanners(sheets);
     const rowIndex = rows.findIndex((row, index) => index > 0 && row[0] === id);
 
     if (rowIndex === -1) {
       return NextResponse.json({ error: 'Banner not found' }, { status: 404 });
     }
 
-    const deleteRange = `Banners!A${rowIndex + 2}:I${rowIndex + 2}`;
-    await sheets.spreadsheets.values.clear({
+    // Resolve the actual sheet ID dynamically
+    const sheetId = await getBannersSheetId(sheets);
+
+    // Use batchUpdate to physically delete the row instead of just clearing values
+    await sheets.spreadsheets.batchUpdate({
       spreadsheetId: SHEET_ID,
-      range: deleteRange,
+      requestBody: {
+        requests: [{
+          deleteDimension: {
+            range: {
+              sheetId,
+              dimension: 'ROWS',
+              startIndex: rowIndex,
+              endIndex: rowIndex + 1,
+            },
+          },
+        }],
+      },
     });
 
     return NextResponse.json({ success: true, message: 'Banner deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting banner:', error);
+  } catch (error: unknown) {
+    // Fallback: if batchUpdate fails, use clear
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('Error deleting banner (will fallback to clear):', errMsg);
+    try {
+      const { id } = await request.json();
+      const sheets = await getSheetsClient(['https://www.googleapis.com/auth/spreadsheets']);
+      const { rows } = await readBanners(sheets);
+      const rowIndex = rows.findIndex((row, index) => index > 0 && row[0] === id);
+      if (rowIndex !== -1) {
+        const deleteRange = `Banners!A${rowIndex + 1}:I${rowIndex + 1}`;
+        await sheets.spreadsheets.values.clear({
+          spreadsheetId: SHEET_ID,
+          range: deleteRange,
+        });
+        return NextResponse.json({ success: true, message: 'Banner deleted (fallback clear)' });
+      }
+    } catch {
+      // Give up
+    }
     return NextResponse.json({ error: 'Failed to delete banner' }, { status: 500 });
   }
 }

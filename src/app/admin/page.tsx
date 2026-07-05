@@ -301,110 +301,96 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-500 text-sm">Loading dashboard...</p>
+          <div className="relative mx-auto mb-6 w-16 h-16">
+            <div className="absolute inset-0 rounded-2xl bg-indigo-500 animate-pulse shadow-[4px_4px_0px_0px_rgba(99,102,241,0.3)]" />
+            <div className="absolute inset-2 flex items-center justify-center">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 w-32 bg-gray-200 rounded-lg mx-auto animate-pulse" />
+            <div className="h-3 w-24 bg-gray-100 rounded-lg mx-auto animate-pulse" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden shrink-0 ring-1 ring-white/20">
-            <img src="/logo.svg" alt="eCatloge" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-            <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-sm text-gray-500">Product catalog overview</p>
-              {lastRefreshed && (
-                <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-medium">
-                  Updated {lastRefreshed}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => fetchProducts()}
-            disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
-          >
-            <svg className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh
-          </button>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            View Catalog
-          </Link>
-        </div>
-      </div>
+    <div className="space-y-6 max-w-7xl mx-auto">
 
-      {/* Quick health summary */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12">
-              <svg className="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke="#e5e7eb" strokeWidth="3" />
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke={healthScore > 80 ? "#10b981" : healthScore > 50 ? "#f59e0b" : "#ef4444"} strokeWidth="3" strokeDasharray={`${(healthScore / 100) * 97.4} 97.4`} strokeLinecap="round" />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-900">{healthScore}%</span>
+      {/* ───── TOOLBAR ───── */}
+      <div className="bg-white rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.12)] p-4 sm:p-5">
+        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+          {/* Left side — brand + health */}
+          <div className="flex items-center gap-5">
+            <div className="h-14 w-14 rounded-2xl bg-indigo-500 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] overflow-hidden ring-2 ring-white/10 shrink-0">
+              <img src="/logo.svg" alt="eCatloge" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Catalog Health</p>
-              <p className="text-sm font-semibold text-gray-900">
-                {healthScore > 80 ? "Healthy" : healthScore > 50 ? "Needs Attention" : "Critical"}
-              </p>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-black text-gray-900 tracking-tight">Dashboard</h1>
+                {lastRefreshed && (
+                  <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+                    {lastRefreshed}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3 mt-0.5">
+                <p className="text-sm font-medium text-gray-500">Product catalog overview</p>
+                <span className="text-xs font-bold text-gray-400">{products.length} products</span>
+              </div>
+            </div>
+
+            {/* Health score pill */}
+            <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl border-2 border-gray-200 bg-gray-50">
+              <div className={`w-2.5 h-2.5 rounded-full ${
+                healthScore > 80 ? "bg-emerald-500" : healthScore > 50 ? "bg-amber-500" : "bg-red-500"
+              }`} />
+              <span className="text-xs font-bold text-gray-700">{healthScore}% Health</span>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="text-sm text-gray-600">
-                <strong className="text-gray-900">{products.length - lowStockCount - outOfStockCount}</strong> In Stock
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-              <span className="text-sm text-gray-600">
-                <strong className="text-gray-900">{lowStockCount}</strong> Low Stock
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-              <span className="text-sm text-gray-600">
-                <strong className="text-gray-900">{outOfStockCount}</strong> Out of Stock
-              </span>
-            </div>
+
+          {/* Right side — actions */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={() => fetchProducts()}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <svg className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {loading ? "Loading..." : "Refresh"}
+            </button>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-gray-900 text-sm font-bold text-gray-900 bg-white hover:bg-gray-50 transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[1px] hover:translate-y-[1px]"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              View Catalog
+            </Link>
+            <button
+              onClick={() => { setShowForm((v) => !v); if (!showForm) window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500 border-2 border-indigo-600 text-white font-bold text-sm shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] hover:shadow-[2px_2px_0px_0px_rgba(99,102,241,0.4)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d={showForm ? "M6 18L18 6M6 6l12 12" : "M12 4v16m8-8H4"} />
+              </svg>
+              {showForm ? "Close Form" : "Add Product"}
+            </button>
           </div>
         </div>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg text-sm shrink-0"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d={showForm ? "M6 18L18 6M6 6l12 12" : "M12 4v16m8-8H4"} />
-          </svg>
-          {showForm ? "Close Form" : "Add Product"}
-        </button>
       </div>
 
-      {/* Stats */}
+      {/* ───── STATS ───── */}
       {stats && <DashboardStats stats={stats} />}
 
-      {/* Product form (slides in between stats and widgets) */}
+      {/* ───── PRODUCT FORM ───── */}
       {showForm && (
         <div className="animate-slideDown">
           <ProductForm
@@ -419,7 +405,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Horizontal Quick Actions + CSV Export row */}
+      {/* ───── QUICK ACTIONS + CSV EXPORT ───── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <QuickActions
           onAddProduct={() => { setShowForm(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
@@ -429,80 +415,19 @@ export default function AdminDashboard() {
         <CsvExport products={products} />
       </div>
 
-      {/* Stock alerts + Category analytics row */}
+      {/* ───── STOCK ALERTS + CATEGORY ANALYTICS ───── */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {stats && (lowStockCount > 0 || outOfStockCount > 0) && (
+        {(lowStockCount > 0 || outOfStockCount > 0) && (
           <div className="xl:col-span-1">
             <StockAlerts products={products} />
           </div>
         )}
-        <div className={stats && (lowStockCount > 0 || outOfStockCount > 0) ? "xl:col-span-3" : "xl:col-span-4"}>
+        <div className={(lowStockCount > 0 || outOfStockCount > 0) ? "xl:col-span-3" : "xl:col-span-4"}>
           <CategoryAnalytics categories={categoryAnalysis} />
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="bg-white rounded-2xl shadow-md p-4">
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* View toggles */}
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2.5 transition-colors ${
-                  viewMode === "grid" ? "bg-indigo-50 text-indigo-600" : "bg-white text-gray-400 hover:text-gray-600"
-                }`}
-                title="Grid view"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setViewMode("table")}
-                className={`p-2.5 transition-colors ${
-                  viewMode === "table" ? "bg-indigo-50 text-indigo-600" : "bg-white text-gray-400 hover:text-gray-600"
-                }`}
-                title="Table view"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-
-            <a
-              href="/admin/settings"
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Settings
-            </a>
-          </div>
-
-          {/* Bulk actions */}
-          {selectedProducts.length > 0 && (
-            <div className="flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-xl w-full lg:w-auto">
-              <span className="text-xs font-semibold text-indigo-700">{selectedProducts.length} selected</span>
-              <div className="h-4 w-px bg-indigo-200" />
-              <button onClick={() => handleBulkAction("hide")} className="px-3 py-1 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors">
-                Hide
-              </button>
-              <button onClick={() => handleBulkAction("show")} className="px-3 py-1 text-xs font-semibold bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors">
-                Show
-              </button>
-              <button onClick={clearSelection} className="px-3 py-1 text-xs font-semibold bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
-                Clear
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Search + filters */}
+      {/* ───── SEARCH + FILTERS BAR ───── */}
       <SearchFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -517,7 +442,7 @@ export default function AdminDashboard() {
         isLoading={loading}
       />
 
-      {/* Products */}
+      {/* ───── PRODUCTS VIEW ───── */}
       {viewMode === "grid" ? (
         <ProductGridView
           products={sortedProducts}
@@ -534,19 +459,19 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* Empty state */}
+      {/* ───── EMPTY STATE ───── */}
       {sortedProducts.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="mx-auto h-14 w-14 text-gray-300 mb-4">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        <div className="text-center py-20 bg-white rounded-2xl border-2 border-gray-200 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.08)]">
+          <div className="mx-auto h-16 w-16 rounded-2xl bg-gray-100 border-2 border-gray-200 flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">No products found</h3>
-          <p className="text-sm text-gray-500 mb-6">Get started by adding your first product to the catalog.</p>
+          <h3 className="text-lg font-black text-gray-900 mb-1">No products found</h3>
+          <p className="text-sm font-medium text-gray-500 mb-6">Get started by adding your first product to the catalog.</p>
           <button
             onClick={() => { setShowForm(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors text-sm shadow-md"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-500 border-2 border-indigo-600 text-white font-bold text-sm shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] hover:shadow-[2px_2px_0px_0px_rgba(99,102,241,0.4)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -555,6 +480,48 @@ export default function AdminDashboard() {
           </button>
         </div>
       )}
+
+      {/* ───── FLOATING MOBILE ACTION (switch view) ───── */}
+      <div className="lg:hidden fixed bottom-20 right-6 z-20 flex flex-col gap-2">
+        {selectedProducts.length > 0 && (
+          <div className="bg-white border-2 border-gray-900 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,0.12)] p-3 mb-2 animate-fadeIn">
+            <p className="text-xs font-bold text-gray-700 mb-2">{selectedProducts.length} selected</p>
+            <div className="flex gap-2">
+              <button onClick={() => handleBulkAction("hide")} className="px-3 py-1.5 text-xs font-bold bg-amber-400 border-2 border-amber-500 text-gray-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(217,119,6,0.3)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(217,119,6,0.3)] transition-all">
+                Hide
+              </button>
+              <button onClick={() => handleBulkAction("show")} className="px-3 py-1.5 text-xs font-bold bg-emerald-400 border-2 border-emerald-500 text-gray-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(16,185,129,0.3)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(16,185,129,0.3)] transition-all">
+                Show
+              </button>
+              <button onClick={clearSelection} className="px-3 py-1.5 text-xs font-bold bg-gray-200 border-2 border-gray-300 text-gray-700 rounded-lg">
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+        {/* View toggle */}
+        <div className="bg-white border-2 border-gray-900 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,0.12)] overflow-hidden flex">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-3 transition-colors ${viewMode === "grid" ? "bg-indigo-500 text-white" : "text-gray-500"}`}
+            aria-label="Grid view"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+          </button>
+          <div className="w-px bg-gray-200 my-2" />
+          <button
+            onClick={() => setViewMode("table")}
+            className={`p-3 transition-colors ${viewMode === "table" ? "bg-indigo-500 text-white" : "text-gray-500"}`}
+            aria-label="Table view"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
