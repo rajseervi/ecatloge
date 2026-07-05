@@ -48,10 +48,10 @@ const NAV_LINKS: SidebarLink[] = [
     label: "View Catalog",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
       </svg>
     ),
-    badge: "Public",
+    badge: "Live",
   },
 ];
 
@@ -101,28 +101,28 @@ export default function AdminSidebar() {
   return (
     <>
       <aside
-        className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-gray-900 via-slate-900 to-gray-900 text-white z-40 flex flex-col transition-all duration-300 ease-in-out ${
+        className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-gray-900 via-slate-900 to-gray-950 text-white z-40 flex flex-col transition-all duration-300 ease-in-out shadow-2xl ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-4 h-16 border-b border-white/10 shrink-0">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center font-bold text-sm shadow-lg shrink-0">
-            EC
+        {/* Logo area */}
+        <div className={`flex items-center h-16 px-4 border-b border-white/[0.06] shrink-0 ${collapsed ? "justify-center" : "gap-3"}`}>
+          <div className="h-9 w-9 min-w-[36px] rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden ring-1 ring-white/10">
+            <img src="/logo.svg" alt="eCatloge" className="h-full w-full object-contain p-1 brightness-0 invert" />
           </div>
           {!collapsed && (
-            <div className="overflow-hidden">
-              <h1 className="text-base font-bold tracking-tight">eCatloge</h1>
-              <p className="text-[10px] text-white/50 uppercase tracking-widest">Admin Panel</p>
+            <div className="overflow-hidden flex-1">
+              <h1 className="text-sm font-bold tracking-tight text-white">eCatloge</h1>
+              <p className="text-[9px] text-white/40 uppercase tracking-[0.15em] font-medium">Admin Panel</p>
             </div>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="ml-auto p-1.5 rounded-lg hover:bg-white/10 transition-colors shrink-0"
+            className={`p-1.5 rounded-lg hover:bg-white/10 transition-colors shrink-0 ${collapsed ? "mt-4" : ""}`}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg
-              className={`w-4 h-4 text-white/60 transition-transform ${collapsed ? "rotate-180" : ""}`}
+              className={`w-4 h-4 text-white/40 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               strokeWidth={2}
@@ -134,10 +134,14 @@ export default function AdminSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 custom-scrollbar">
-          <p className={`px-3 text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-2 ${collapsed ? "text-center" : ""}`}>
-            {collapsed ? "•••" : "Main"}
-          </p>
+        <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1 scrollbar-hide">
+          {/* Main section label */}
+          <div className={`px-3 mb-2 ${collapsed ? "text-center" : ""}`}>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/20">
+              {collapsed ? "•••" : "Main Menu"}
+            </span>
+          </div>
+
           {NAV_LINKS.map((link) => {
             const active = isActive(link.href);
             return (
@@ -146,22 +150,31 @@ export default function AdminSidebar() {
                 href={link.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative ${
                   active
-                    ? "bg-indigo-600/20 text-indigo-300 shadow-sm"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? "bg-indigo-500/15 text-indigo-300 shadow-sm shadow-indigo-500/5"
+                    : "text-white/50 hover:text-white hover:bg-white/[0.04]"
                 }`}
                 title={collapsed ? link.label : undefined}
               >
-                <span className="shrink-0">{link.icon}</span>
+                {/* Active glow */}
+                {active && (
+                  <span className="absolute inset-0 rounded-xl bg-indigo-500/5 blur-sm" />
+                )}
+                {/* Active indicator bar */}
+                {active && !collapsed && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-indigo-400 rounded-r-full shadow-sm shadow-indigo-400/50" />
+                )}
+                <span className={`relative z-10 shrink-0 transition-transform duration-200 ${
+                  active ? "scale-110" : "group-hover:scale-110"
+                }`}>
+                  {link.icon}
+                </span>
                 {!collapsed && (
                   <>
-                    <span>{link.label}</span>
+                    <span className="relative z-10">{link.label}</span>
                     {link.badge && (
-                      <span className="ml-auto px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-semibold">
+                      <span className="ml-auto relative z-10 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[9px] font-bold uppercase tracking-wider ring-1 ring-emerald-500/20">
                         {link.badge}
                       </span>
-                    )}
-                    {active && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5/6 bg-indigo-400 rounded-r-full" />
                     )}
                   </>
                 )}
@@ -169,42 +182,54 @@ export default function AdminSidebar() {
             );
           })}
 
-          <div className="my-3 border-t border-white/10" />
+          {/* Divider */}
+          <div className="my-4 border-t border-white/[0.06]" />
 
-          <p className={`px-3 text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-2 ${collapsed ? "text-center" : ""}`}>
-            {collapsed ? "•••" : "Quick Links"}
-          </p>
+          {/* Quick Links label */}
+          <div className={`px-3 mb-2 ${collapsed ? "text-center" : ""}`}>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/20">
+              {collapsed ? "•••" : "Quick Links"}
+            </span>
+          </div>
+
           {QUICK_LINKS.map((link) => {
             const active = isActive(link.href);
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative ${
                   active
-                    ? "bg-indigo-600/20 text-indigo-300"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? "bg-indigo-500/15 text-indigo-300"
+                    : "text-white/50 hover:text-white hover:bg-white/[0.04]"
                 }`}
                 title={collapsed ? link.label : undefined}
               >
-                <span className="shrink-0">{link.icon}</span>
-                {!collapsed && <span>{link.label}</span>}
+                {active && !collapsed && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-indigo-400 rounded-r-full" />
+                )}
+                <span className={`relative z-10 shrink-0 transition-transform duration-200 ${
+                  active ? "scale-110" : "group-hover:scale-110"
+                }`}>
+                  {link.icon}
+                </span>
+                {!collapsed && <span className="relative z-10">{link.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        {/* Logout */}
-        <div className="px-3 py-3 border-t border-white/10">
+        {/* Bottom section */}
+        <div className="px-3 py-3 border-t border-white/[0.06] space-y-1">
           <button
             onClick={() => setShowLogoutConfirm(true)}
             disabled={isSigningOut}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 w-full ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 w-full group ${
               collapsed ? "justify-center" : ""
             }`}
             title={collapsed ? "Log out" : undefined}
           >
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <svg className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110 duration-200" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             {!collapsed && (
@@ -216,7 +241,7 @@ export default function AdminSidebar() {
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-fadeIn">
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 rounded-full bg-red-100">
