@@ -1,0 +1,183 @@
+"use client";
+
+import { Product } from "@/types/product";
+import Image from "next/image";
+import Link from "next/link";
+
+interface ProductTableViewProps {
+  products: Product[];
+  selectedProducts: string[];
+  onToggleSelect: (id: string) => void;
+  onSelectAll: () => void;
+  onClearSelection: () => void;
+  onEdit: (product: Product) => void;
+}
+
+export default function ProductTableView({
+  products,
+  selectedProducts,
+  onToggleSelect,
+  onSelectAll,
+  onClearSelection,
+  onEdit,
+}: ProductTableViewProps) {
+  const allSelected = products.length > 0 && selectedProducts.length === products.length;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-900">
+          Products <span className="text-gray-400 font-normal">({products.length})</span>
+        </h3>
+        <div className="flex items-center gap-3">
+          {selectedProducts.length > 0 && (
+            <span className="text-xs text-gray-500">
+              <span className="font-semibold text-indigo-600">{selectedProducts.length}</span> selected
+            </span>
+          )}
+          <button
+            onClick={allSelected ? onClearSelection : onSelectAll}
+            className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+          >
+            {allSelected ? "Deselect All" : "Select All"}
+          </button>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-100">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-5 py-3 text-left">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={allSelected ? onClearSelection : onSelectAll}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {products.map((product) => (
+              <tr
+                key={product.id}
+                className={`hover:bg-gray-50 transition-colors ${
+                  selectedProducts.includes(product.id) ? "bg-indigo-50/50" : ""
+                }`}
+              >
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.includes(product.id)}
+                    onChange={() => onToggleSelect(product.id)}
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl overflow-hidden bg-gray-50 shrink-0">
+                      <Image
+                        src={product.imageUrl}
+                        alt={product.name || "Product thumbnail"}
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">{product.name}</div>
+                      <div className="text-xs text-gray-500 truncate max-w-[250px]">{product.description}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {product.category ? (
+                    <span className="inline-flex px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-indigo-50 text-indigo-700">
+                      {product.category}
+                    </span>
+                  ) : (
+                    <span className="text-gray-300 text-sm">—</span>
+                  )}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                  ${typeof product.price === "number" ? product.price.toFixed(2) : "0.00"}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <span
+                    className={`text-sm font-semibold ${
+                      product.inventory === 0
+                        ? "text-red-600"
+                        : product.inventory <= 5
+                        ? "text-amber-600"
+                        : "text-gray-900"
+                    }`}
+                  >
+                    {product.inventory}
+                  </span>
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <div className="flex flex-wrap gap-1">
+                    {product.inventory === 0 && (
+                      <span className="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-50 text-red-700 uppercase tracking-wider">
+                        Out of Stock
+                      </span>
+                    )}
+                    {product.inventory > 0 && product.inventory <= 5 && (
+                      <span className="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-700 uppercase tracking-wider">
+                        Low Stock
+                      </span>
+                    )}
+                    {product.hidden && (
+                      <span className="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full bg-gray-100 text-gray-600 uppercase tracking-wider">
+                        Hidden
+                      </span>
+                    )}
+                    {product.inventory > 5 && !product.hidden && (
+                      <span className="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-700 uppercase tracking-wider">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap text-sm">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onEdit(product)}
+                      className="px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <Link
+                      href={`/product/${product.id}`}
+                      className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {products.length === 0 && (
+        <div className="text-center py-12 px-6">
+          <div className="mx-auto h-12 w-12 text-gray-300 mb-3">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-gray-900">No products found</p>
+          <p className="text-xs text-gray-500 mt-1">Try adjusting your search or filter criteria.</p>
+        </div>
+      )}
+    </div>
+  );
+}
