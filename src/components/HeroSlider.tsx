@@ -128,7 +128,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
           const isActive = currentSlide === index;
           return (
             <div
-              key={banner.id}
+              key={`${banner.id}-${index}`}
               className="min-w-full relative"
               role="group"
               aria-roledescription="slide"

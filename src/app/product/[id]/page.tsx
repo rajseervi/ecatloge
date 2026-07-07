@@ -110,6 +110,8 @@ function ProductContent() {
     searchTerm,
     isSearching,
     isScrolled,
+    phone: company.phone,
+    email: company.email,
   };
 
   const getStockInfo = (inventory: number) => {

@@ -37,14 +37,14 @@ function isRowEmpty(row: string[]): boolean {
 }
 
 function parseBannerRow(row: string[], index: number): Banner {
-  // If id is empty, derive a unique stable id from row content hash
-  let id = row[0];
-  if (!id || id.trim() === '') {
+  // If id is empty, derive a unique stable id from row content hash + index
+  let id = (row[0] || '').trim();
+  if (!id) {
     const hash = Array.from(row.join('|'))
       .reduce((acc, char) => ((acc << 5) - acc) + char.charCodeAt(0), 0)
       .toString(36)
       .replace(/^-/, '0');
-    id = `banner_${hash}`;
+    id = `banner_${hash}_${index}`;
   }
   const isActive = row[7]?.toString().toLowerCase() === 'true' || row[7] === '1';
   const sortOrder = parseInt(row[8] || '0') || index;

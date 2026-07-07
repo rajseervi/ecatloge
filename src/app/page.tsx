@@ -31,8 +31,9 @@ export default function Catalog() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannersLoaded, setBannersLoaded] = useState(false);
   const productsRef = useRef<HTMLDivElement>(null);
+  const hasInitiallyScrolled = useRef(false);
 
-  const limit = 24;
+  const limit = 50;
   const hasActiveSearch = debouncedSearch.length > 0 || selectedCategory !== 'all';
 
   const { isScrolled } = useScrollBehavior();
@@ -82,12 +83,16 @@ export default function Catalog() {
     return () => { clearTimeout(t); setIsSearching(false); };
   }, [searchTerm]);
 
-  /* ── scroll to products when search changes ── */
+  /* ── scroll to products when search/category changes (not on initial load) ── */
   useEffect(() => {
-    if (!isInitialLoad && productsRef.current) {
+    if (!hasInitiallyScrolled.current) {
+      hasInitiallyScrolled.current = true;
+      return;
+    }
+    if (productsRef.current) {
       productsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [debouncedSearch, selectedCategory, isInitialLoad]);
+  }, [debouncedSearch, selectedCategory]);
 
   /* ── fetch products ──────── */
   useEffect(() => {
@@ -152,6 +157,8 @@ export default function Catalog() {
     searchTerm,
     isSearching,
     isScrolled,
+    phone: company.phone,
+    email: company.email,
   };
 
   /* ── loading screen ──────── */
@@ -168,33 +175,53 @@ export default function Catalog() {
       />
 
       {/* Hero Section — dynamic slider or static fallback */}
-      {bannersLoaded && banners.length > 0 ? (
-        <HeroSlider banners={banners} companyName={company.name} phone={company.phone} />
-      ) : (
-        <CatalogHero companyName={company.name} phone={company.phone} />
-      )}
+      {/* Fixed min-height wrapper prevents layout shift when banners load after the initial render */}
+      <div className="min-h-[300px] sm:min-h-[400px] md:min-h-[450px] lg:min-h-[500px]">
+        {bannersLoaded && banners.length > 0 ? (
+          <HeroSlider banners={banners} companyName={company.name} phone={company.phone} />
+        ) : (
+          <CatalogHero companyName={company.name} phone={company.phone} />
+        )}
+      </div>
 
       {/* Products section anchor + Compact intro when searching */}
       <div id="products" ref={productsRef}>
-        {/* Category Filter */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider shrink-0">Categories</span>
-              <div className="flex gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => handleCategorySelect(cat)}
-                    className={`px-4 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-all duration-150 ${
-                      selectedCategory === cat
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
-                    }`}
-                  >
-                    {cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-                  </button>
-                ))}
+        {/* Category Filter - Sticky bar with improved visual design */}
+        <div className="sticky top-[52px] md:top-[84px] lg:top-[124px] z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-shadow">
+          <div className="px-4 sm:px-6 lg:px-8 py-2.5">
+            <div className="flex items-center gap-4">
+              <span className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider shrink-0">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+                Categories
+              </span>
+              {/* Scroll container with gradient fade */}
+              <div className="relative flex-1 min-w-0">
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pr-2">
+                  {categories.map((cat) => {
+                    const isActive = selectedCategory === cat;
+                    const label = cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() + cat.slice(1);
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => handleCategorySelect(cat)}
+                        className={`relative px-3.5 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+                          isActive
+                            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 scale-105'
+                            : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm'
+                        }`}
+                      >
+                        {label}
+                        {isActive && (
+                          <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-white/60 rounded-full" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Right-edge fade indicator for overflow */}
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/80 to-transparent pointer-events-none" />
               </div>
             </div>
           </div>
