@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from "@/types/company";
 import CatalogHeader, { type CatalogHeaderConfig } from "@/components/CatalogHeader";
@@ -8,7 +8,7 @@ import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 
 const MILESTONES = [
   { year: "2010", title: "Founded", description: "Vishnu Agency established with a vision to provide quality plumbing solutions." },
-  { year: "2013", title: "Ashirvad Partnership", description: "Became an  of Ashirvad Pipes & Water Tanks." },
+  { year: "2013", title: "Ashirvad Partnership", description: "Became an authorized partner and distributor of Ashirvad Pipes & Water Tanks." },
   { year: "2016", title: "Hindware Authorized", description: "Added Hindware Sanitaryware to our brand portfolio." },
   { year: "2019", title: "Watertec Onboarded", description: "Expanded into bath fittings with Watertec partnership." },
   { year: "2023", title: "Digital Catalog Launch", description: "Launched our digital catalog for easy product browsing." },
@@ -45,6 +45,13 @@ const VALUES = [
   },
 ];
 
+// Map dynamic brand classes explicitly so Tailwind can discover them
+const BRAND_THEMES: Record<string, { bg: string; text: string; badge: string }> = {
+  emerald: { bg: "bg-emerald-100", text: "text-emerald-700", badge: "text-emerald-600 bg-emerald-50" },
+  indigo: { bg: "bg-indigo-100", text: "text-indigo-700", badge: "text-indigo-600 bg-indigo-50" },
+  sky: { bg: "bg-sky-100", text: "text-sky-700", badge: "text-sky-600 bg-sky-50" },
+};
+
 const BRANDS = [
   {
     name: "Ashirvad",
@@ -79,13 +86,14 @@ export default function AboutPage() {
           setCompany((prev) => ({ ...prev, ...data.company }));
         }
       } catch {
-        // fallback to defaults
+        // Safe fallback to default states
       }
     };
     fetchCompany();
   }, []);
 
-  const headerConfig: CatalogHeaderConfig = {
+  // Use memoization to prevent recreating config object on re-renders
+  const headerConfig: CatalogHeaderConfig = useMemo(() => ({
     companyName: company.name,
     tagline: company.tagline,
     totalProducts: 0,
@@ -94,7 +102,7 @@ export default function AboutPage() {
     isScrolled,
     phone: company.phone,
     email: company.email,
-  };
+  }), [company, isScrolled]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -242,25 +250,28 @@ export default function AboutPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            {BRANDS.map((brand) => (
-              <div
-                key={brand.name}
-                className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 text-center hover:shadow-md transition-all duration-200"
-              >
-                <div className={`w-16 h-16 mx-auto mb-5 rounded-2xl bg-${brand.color}-100 flex items-center justify-center`}>
-                  <span className={`text-${brand.color}-700 font-extrabold text-xl`}>{brand.name.charAt(0)}</span>
+            {BRANDS.map((brand) => {
+              const theme = BRAND_THEMES[brand.color] || BRAND_THEMES.emerald;
+              return (
+                <div
+                  key={brand.name}
+                  className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 text-center hover:shadow-md transition-all duration-200"
+                >
+                  <div className={`w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center ${theme.bg}`}>
+                    <span className={`font-extrabold text-xl ${theme.text}`}>{brand.name.charAt(0)}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">{brand.name}</h3>
+                  <p className="text-sm font-semibold text-emerald-600 mt-1">{brand.tagline}</p>
+                  <p className="text-sm text-gray-500 mt-3 leading-relaxed">{brand.description}</p>
+                  <div className={`mt-5 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${theme.badge}`}>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Authorized Partner
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">{brand.name}</h3>
-                <p className="text-sm font-semibold text-emerald-600 mt-1">{brand.tagline}</p>
-                <p className="text-sm text-gray-500 mt-3 leading-relaxed">{brand.description}</p>
-                <div className={`mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-${brand.color}-600 bg-${brand.color}-50 px-3 py-1.5 rounded-full`}>
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  Known for Quality
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -326,10 +337,10 @@ export default function AboutPage() {
               Why Choose Us
             </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight">
-              The Vishnu Agency Difference
+              The Difference
             </h2>
             <p className="mt-4 text-slate-400 leading-relaxed">
-              What sets us apart from other suppliers in Hyderabad.
+              What sets us apart from other suppliers in the region.
             </p>
           </div>
 
@@ -346,8 +357,8 @@ export default function AboutPage() {
                 icon: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
               },
               {
-                title: "Pan-Hyderabad Delivery",
-                description: "We serve customers across Hyderabad, Secunderabad, and surrounding areas with timely and reliable delivery.",
+                title: "Regional Delivery",
+                description: "We serve customers across our target areas with timely, prompt, and reliable logistics options.",
                 icon: "M13 10V3L4 14h7v7l9-11h-7z",
               },
             ].map((item) => (
