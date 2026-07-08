@@ -18,11 +18,30 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
   const [touchEnd, setTouchEnd] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [slideKey, setSlideKey] = useState(0);
+  const [parallaxOffset, setParallaxOffset] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   const totalSlides = banners.length;
+
+  /* ── Parallax: scroll-based offset ──────── */
+  useEffect(() => {
+    const handleScroll = () => {
+      const el = sectionRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const viewportH = window.innerHeight;
+      // When section top is at viewport top → 0, when scrolled past → negative
+      // Map scroll progress 0..1 to offset range 0..120px
+      const progress = Math.max(0, Math.min(1, -rect.top / viewportH));
+      setParallaxOffset(progress * 120);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // initial call
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const goToSlide = useCallback((index: number) => {
     const newIndex = ((index % totalSlides) + totalSlides) % totalSlides;
@@ -106,15 +125,15 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
 
   return (
     <section
-      ref={containerRef}
-      className="group relative w-full overflow-hidden bg-slate-900 select-none"
+      ref={sectionRef}
+      className="group relative w-full h-screen overflow-hidden bg-slate-900 select-none"
       aria-label="Featured promotions carousel"
       role="region"
       aria-roledescription="carousel"
     >
       <div
         ref={trackRef}
-        className="flex transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] cursor-grab active:cursor-grabbing"
+        className="flex h-full transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] cursor-grab active:cursor-grabbing"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -129,83 +148,95 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
           return (
             <div
               key={`${banner.id}-${index}`}
-              className="min-w-full relative"
+              className="min-w-full h-full relative"
               role="group"
               aria-roledescription="slide"
               aria-label={`Slide ${index + 1} of ${totalSlides}: ${banner.title}`}
               aria-hidden={!isActive}
             >
-              <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px]">
-                {banner.imageUrl ? (
-                  <Image
-                    src={banner.imageUrl}
-                    alt={banner.title || `Banner ${index + 1}`}
-                    fill
-                    className="object-cover scale-100 transition-transform duration-[8000ms] ease-linear"
-                    style={{ transform: isActive ? "scale(1.05)" : "scale(1)" }}
-                    priority={index === 0}
-                    sizes="100vw"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+              {/* Parallax image wrapper - overflows to allow movement */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div
+                  className="absolute inset-0 will-change-transform"
+                  style={{ transform: `translateY(${parallaxOffset}px)` }}
+                >
+                  {banner.imageUrl ? (
+                    <Image
+                      src={banner.imageUrl}
+                      alt={banner.title || `Banner ${index + 1}`}
+                      fill
+                      className="object-cover scale-110"
+                      style={{
+                        transform: isActive ? "scale(1.15)" : "scale(1.1)",
+                        transition: "transform 8000ms linear",
+                      }}
+                      priority={index === 0}
+                      sizes="100vw"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950" />
+                  )}
+                </div>
+              </div>
 
-                <div className="absolute inset-0 flex items-center">
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                    <div
-                      key={`content-${slideKey}-${index}`}
-                      className={`max-w-xl lg:max-w-2xl transition-all duration-700 ease-out ${
-                        isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              {/* Dark overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+
+              {/* Content overlay */}
+              <div className="absolute inset-0 flex items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                  <div
+                    key={`content-${slideKey}-${index}`}
+                    className={`max-w-xl lg:max-w-2xl transition-all duration-700 ease-out ${
+                      isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                    }`}
+                    style={{ transitionDelay: isActive ? "150ms" : "0ms" }}
+                  >
+                    {banner.subtitle && (
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-emerald-300 text-xs font-semibold tracking-wide mb-4 backdrop-blur-sm animate-slide-in-up">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {banner.subtitle}
+                      </div>
+                    )}
+
+                    <h2
+                      className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight tracking-tight mb-3 drop-shadow-lg transition-all duration-700 ease-out ${
+                        isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
                       }`}
-                      style={{ transitionDelay: isActive ? "150ms" : "0ms" }}
+                      style={{ transitionDelay: isActive ? "300ms" : "0ms" }}
                     >
-                      {banner.subtitle && (
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-emerald-300 text-xs font-semibold tracking-wide mb-4 backdrop-blur-sm animate-slide-in-up">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          {banner.subtitle}
-                        </div>
-                      )}
+                      {banner.title}
+                    </h2>
 
-                      <h2
-                        className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight tracking-tight mb-3 drop-shadow-lg transition-all duration-700 ease-out ${
-                          isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                    {banner.description && (
+                      <p
+                        className={`text-sm sm:text-base md:text-lg text-slate-200 leading-relaxed mb-6 max-w-lg line-clamp-2 sm:line-clamp-3 transition-all duration-700 ease-out ${
+                          isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                         }`}
-                        style={{ transitionDelay: isActive ? "300ms" : "0ms" }}
+                        style={{ transitionDelay: isActive ? "450ms" : "0ms" }}
                       >
-                        {banner.title}
-                      </h2>
+                        {banner.description}
+                      </p>
+                    )}
 
-                      {banner.description && (
-                        <p
-                          className={`text-sm sm:text-base md:text-lg text-slate-200 leading-relaxed mb-6 max-w-lg line-clamp-2 sm:line-clamp-3 transition-all duration-700 ease-out ${
-                            isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                          }`}
-                          style={{ transitionDelay: isActive ? "450ms" : "0ms" }}
+                    {banner.ctaText && (
+                      <div
+                        className={`transition-all duration-700 ease-out ${
+                          isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                        }`}
+                        style={{ transitionDelay: isActive ? "600ms" : "0ms" }}
+                      >
+                        <Link
+                          href={banner.ctaLink || "/"}
+                          className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50 hover:scale-105 active:scale-[0.97]"
                         >
-                          {banner.description}
-                        </p>
-                      )}
-
-                      {banner.ctaText && (
-                        <div
-                          className={`transition-all duration-700 ease-out ${
-                            isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                          }`}
-                          style={{ transitionDelay: isActive ? "600ms" : "0ms" }}
-                        >
-                          <Link
-                            href={banner.ctaLink || "/"}
-                            className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50 hover:scale-105 active:scale-[0.97]"
-                          >
-                            {banner.ctaText}
-                            <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                          </Link>
-                        </div>
-                      )}
-                    </div>
+                          {banner.ctaText}
+                          <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -237,8 +268,16 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
         </>
       )}
 
+      {/* Scroll-down indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-bounce">
+        <span className="text-xs text-white/60 tracking-widest uppercase">Scroll</span>
+        <svg className="w-5 h-5 text-white/60" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </div>
+
       {totalSlides > 1 && (
-        <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
           {banners.map((_, index) => (
             <button
               key={index}

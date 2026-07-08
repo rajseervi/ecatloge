@@ -95,7 +95,7 @@ export default function ContactPage() {
             </h1>
             <p className="mt-4 text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl">
               Have a question about our products, need a bulk order quote, or want to visit our
-              warehouse? We'd love to hear from you.
+              warehouse? We would love to hear from you.
             </p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export default function ContactPage() {
                 Send Us a Message
               </h2>
               <p className="text-sm text-gray-500 mb-8">
-                Fill out the form below and we'll get back to you within 24 hours.
+                Fill out the form below and we will get back to you within 24 hours.
               </p>
 
               {submitted ? (
@@ -123,7 +123,7 @@ export default function ContactPage() {
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">Message Sent!</h3>
                   <p className="text-sm text-gray-500 mb-6">
-                    Thank you for reaching out. We'll respond shortly.
+                    Thank you for reaching out. We will respond shortly.
                   </p>
                   <button
                     onClick={() => { setSubmitted(false); setFormState({ name: "", email: "", phone: "", message: "" }); }}
@@ -287,7 +287,7 @@ export default function ContactPage() {
               <h3 className="text-lg font-bold text-gray-900 mb-4">Business Hours</h3>
               <div className="space-y-3">
                 {[
-                  { day: "Monday — Saturday", hours: "9:30 AM – 7:30 PM", active: true },
+                  { day: "Monday to Saturday", hours: "9:30 AM - 7:30 PM", active: true },
                   { day: "Sunday", hours: "Closed", active: false },
                 ].map((item) => (
                   <div

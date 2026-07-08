@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Banner } from "@/types/banner";
 import Image from "next/image";
 import BannerCsvExport from "@/app/admin/_components/BannerCsvExport";
@@ -366,7 +366,7 @@ export default function AdminBannersPage() {
         <div className="space-y-4">
           {sortedBanners.map((banner, index) => (
             <div
-              key={banner.id}
+              key={`${banner.id}-${index}`}
               className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all ${
                 banner.isActive ? "border-gray-100" : "border-gray-200 opacity-60"
               }`}

@@ -11,21 +11,21 @@ interface ProductGridViewProps {
   onToggleSelect: (id: string) => void;
 }
 
-const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23e5e7eb'%3E%3Crect width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' fill='%239ca3af' font-family='sans-serif' font-size='16' text-anchor='middle' dominant-baseline='central'%3ENo Image%3C/text%3E%3C/svg%3E";
+const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23e5e7eb'%3E%3Crect width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' fill='%239ca3af' font-family='sans-serif' font-size='16' text-anchor='middle' dominant-baseline='central' font-weight='bold'%3ENo Image%3C/text%3E%3C/svg%3E";
 
 function StockBadge({ inventory }: { inventory: number }) {
   if (inventory === 0) {
     return (
-      <div className="absolute top-3 right-3 bg-red-500 text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-md">
-        Out of Stock
-      </div>
+      <span className="absolute top-3 right-3 bg-red-500 text-white px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider shadow-sm">
+        Out
+      </span>
     );
   }
   if (inventory <= 5) {
     return (
-      <div className="absolute top-3 right-3 bg-amber-500 text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-md">
-        Low Stock
-      </div>
+      <span className="absolute top-3 right-3 bg-amber-400 text-amber-900 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider shadow-sm">
+        Low
+      </span>
     );
   }
   return null;
@@ -36,7 +36,7 @@ function ProductImage({ src, alt }: { src: string; alt: string }) {
 
   if (error || !src) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs font-medium">
+      <div className="w-full h-full flex items-center justify-center bg-slate-100">
         <img src={FALLBACK_IMG} alt="" className="w-full h-full object-cover" />
       </div>
     );
@@ -54,76 +54,66 @@ function ProductImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function ProductGridView({
-  products,
-  selectedProducts,
-  onToggleSelect,
-}: ProductGridViewProps) {
+export default function ProductGridView({ products, selectedProducts, onToggleSelect }: ProductGridViewProps) {
   if (products.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
       {products.map((product, index) => {
         const isSelected = selectedProducts.includes(product.id);
         return (
           <div
             key={product.id || `product-${index}`}
-            className={`group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border ${
-              isSelected ? "border-indigo-400 ring-2 ring-indigo-200" : "border-gray-100"
+            className={`group bg-white rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-md ${
+              isSelected ? "border-indigo-400 ring-2 ring-indigo-200" : "border-slate-200 hover:border-slate-300"
             }`}
           >
-            {/* Image */}
-            <div className="relative h-48 bg-gray-50">
+            <div className="relative h-44 bg-slate-50 border-b border-slate-200">
               <ProductImage src={product.imageUrl} alt={product.name || "Product image"} />
               <StockBadge inventory={product.inventory} />
               {product.hidden && (
-                <div className="absolute bottom-3 left-3 bg-gray-900/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                <span className="absolute bottom-3 left-3 bg-slate-900/70 text-white px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider backdrop-blur-sm">
                   Hidden
-                </div>
+                </span>
               )}
-              <label className="absolute top-3 left-3 z-10">
+              <label className="absolute top-3 left-3 z-10 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => onToggleSelect(product.id)}
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shadow-sm"
+                  className="h-4 w-4 rounded border-slate-400 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                 />
               </label>
             </div>
 
-            {/* Content */}
-            <div className="p-5">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-gray-900 truncate">{product.name}</h3>
-                  {product.category && (
-                    <span className="inline-block text-[10px] font-semibold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full mt-1 uppercase tracking-wider">
-                      {product.category}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <p className="text-sm text-gray-500 mb-4 line-clamp-2">{product.description}</p>
+            <div className="p-4">
+              <h3 className="text-sm font-semibold text-slate-900 truncate">{product.name}</h3>
+              {product.category && (
+                <span className="inline-block text-[10px] font-medium px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md mt-1 uppercase tracking-wider border border-indigo-200">
+                  {product.category}
+                </span>
+              )}
+              <p className="text-xs text-slate-500 mt-2 line-clamp-2">{product.description}</p>
 
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
                 <div>
-                  <p className="text-xl font-bold text-emerald-600">${typeof product.price === "number" ? product.price.toFixed(2) : "0.00"}</p>
-                  <p className="text-xs text-gray-500">
-                    Stock: <span className="font-semibold text-gray-700">{product.inventory}</span>
+                  <p className="text-lg font-bold text-emerald-600">${typeof product.price === "number" ? product.price.toFixed(2) : "0.00"}</p>
+                  <p className="text-[10px] font-medium text-slate-500">
+                    Stock: <span className="text-slate-800 font-semibold">{product.inventory}</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-3">
                 <Link
                   href={`/admin/products/edit/${product.id}`}
-                  className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg text-center"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-medium text-center transition-colors shadow-sm"
                 >
                   Edit
                 </Link>
                 <Link
                   href={`/product/${product.id}`}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl text-sm font-semibold transition-colors text-center"
+                  className="flex-1 bg-white hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-lg text-xs font-medium text-center border border-slate-300 transition-colors"
                 >
                   View
                 </Link>

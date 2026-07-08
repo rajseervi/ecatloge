@@ -174,15 +174,12 @@ export default function Catalog() {
         onClearSearch={handleClearSearch}
       />
 
-      {/* Hero Section — dynamic slider or static fallback */}
-      {/* Fixed min-height wrapper prevents layout shift when banners load after the initial render */}
-      <div className="min-h-[300px] sm:min-h-[400px] md:min-h-[450px] lg:min-h-[500px]">
-        {bannersLoaded && banners.length > 0 ? (
-          <HeroSlider banners={banners} companyName={company.name} phone={company.phone} />
-        ) : (
-          <CatalogHero companyName={company.name} phone={company.phone} />
-        )}
-      </div>
+      {/* Hero Section — full viewport height with parallax */}
+      {bannersLoaded && banners.length > 0 ? (
+        <HeroSlider banners={banners} companyName={company.name} phone={company.phone} />
+      ) : (
+        <CatalogHero companyName={company.name} phone={company.phone} />
+      )}
 
       {/* Products section anchor + Compact intro when searching */}
       <div id="products" ref={productsRef}>
